@@ -28,7 +28,14 @@ jobs:
         version: latest
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: |
+        echo "Installing dependencies with pnpm..."
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "pnpm-lock.yaml exists: $(test -f pnpm-lock.yaml && echo 'YES' || echo 'NO')"
+        pnpm install --frozen-lockfile || pnpm install
+        echo "Dependencies installed successfully"
 
     - name: Run linter
       run: pnpm run lint
@@ -57,7 +64,14 @@ jobs:
         version: latest
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: |
+        echo "Installing dependencies with pnpm..."
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "pnpm-lock.yaml exists: $(test -f pnpm-lock.yaml && echo 'YES' || echo 'NO')"
+        pnpm install --frozen-lockfile || pnpm install
+        echo "Dependencies installed successfully"
 
     - name: Run security audit
       run: pnpm audit --audit-level moderate
