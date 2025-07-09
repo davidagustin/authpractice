@@ -8,14 +8,12 @@ metadata:
     app.kubernetes.io/part-of: gitops
 spec:
   generators:
-    - matrix:
-        generators:
-          - list:
-              elements:
-                - branch: main
-                  environment: production
-                - branch: develop
-                  environment: development
+    - list:
+        elements:
+          - branch: main
+            environment: production
+          - branch: develop
+            environment: development
   template:
     metadata:
       name: 'authpractice-{{environment}}'
