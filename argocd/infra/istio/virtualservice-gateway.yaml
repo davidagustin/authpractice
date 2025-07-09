@@ -1,0 +1,71 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authpractice-vs-gateway
+  namespace: default
+spec:
+  hosts:
+  - "authpractice.local"
+  - "authpractice.default.svc.cluster.local"
+  gateways:
+  - istio-system/authpractice-gateway
+  http:
+  - route:
+    - destination:
+        host: authpractice.default.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    timeout: 10s
+    corsPolicy:
+      allowOrigins:
+      - exact: "http://localhost:32001"
+      - exact: "http://localhost:32000"
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - "content-type"
+      - "authorization"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authpractice-vs-gateway-prod
+  namespace: authpractice
+spec:
+  hosts:
+  - "authpractice-prod.local"
+  - "authpractice.authpractice.svc.cluster.local"
+  gateways:
+  - istio-system/authpractice-gateway
+  http:
+  - route:
+    - destination:
+        host: authpractice.authpractice.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    timeout: 10s
+    corsPolicy:
+      allowOrigins:
+      - exact: "http://localhost:32001"
+      - exact: "http://localhost:32000"
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - "content-type"
+      - "authorization" 

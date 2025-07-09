@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: istio-service-mesh
+  namespace: istio-system
+
+resources:
+  # Istio Operator configuration
+  - istio-operator.yaml
+  
+  # Gateway configurations
+  - gateway-ingress.yaml
+  
+  # Virtual Services
+  - virtualservice-gateway.yaml
+  - ambient-config.yaml
+  
+  # Destination Rules
+  - destinationrule.yaml
+  
+  # Authorization Policies
+  - authorizationpolicy.yaml
+
+commonLabels:
+  app.kubernetes.io/name: istio
+  app.kubernetes.io/part-of: service-mesh
+  app.kubernetes.io/version: "1.26.2"
+
+namespace: istio-system 

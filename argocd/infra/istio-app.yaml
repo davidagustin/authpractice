@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-service-mesh
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: istio
+    app.kubernetes.io/part-of: infrastructure
+    environment: shared
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: PrunePropagationPolicy=foreground
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/davidagustin/authpractice.git'
+    targetRevision: develop
+    path: argocd/infra/istio
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+  revisionHistoryLimit: 10 
