@@ -5,9 +5,9 @@ RUN npm install -g pnpm
 # Build the application
 FROM base AS builder
 WORKDIR /app
-COPY frontend/package.json ./
+COPY package.json ./
 COPY pnpm-lock.yaml* ./
-COPY frontend/ .
+COPY . .
 RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi && pnpm run build
 
 # Production image
