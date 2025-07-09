@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: authpractice
   pullPolicy: IfNotPresent
-  tag: "0.1.8"
+  tag: "latest"
 
 service:
   type: NodePort
