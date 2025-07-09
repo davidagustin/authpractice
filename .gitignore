@@ -164,3 +164,20 @@ frontend/.dockerignore
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Istio CLI downloads
+istio-*/
+
+# ArgoCD temporary files
+argocd/tmp/
+argocd/.cache/
+
+# Helm temporary files
+helm/charts/
+helm/*.tgz
+helm/*.tar.gz
+
+# Backup files
+*.bak
+*.backup
+*.old
