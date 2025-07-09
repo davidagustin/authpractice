@@ -1,0 +1,105 @@
+version: '3'
+
+vars:
+  IMAGE_NAME: authpractice
+  IMAGE_TAG: '{{.IMAGE_TAG | default "latest"}}'
+  CLUSTER_NAME: authpractice-cluster
+
+tasks:
+  dev:
+    desc: Start development server
+    dir: frontend
+    cmds:
+      - pnpm install
+      - pnpm dev
+
+  install:
+    desc: Install dependencies
+    dir: frontend
+    cmds:
+      - pnpm install
+
+  build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} frontend/
+
+  docker-clean:
+    desc: Clean up Docker resources
+    cmds:
+      - ./scripts/cleanup-docker.sh
+
+  docker-prune:
+    desc: Prune all unused Docker resources
+    cmds:
+      - docker system prune -a -f
+      - docker builder prune -f
+      - docker volume prune -f
+
+  k8s-deploy:
+    desc: Deploy to Kubernetes
+    deps: [build]
+    cmds:
+      - docker save {{.IMAGE_NAME}}:{{.IMAGE_TAG}} | k3d image import - {{.CLUSTER_NAME}}
+      - kubectl set image deployment/authpractice authpractice={{.IMAGE_NAME}}:{{.IMAGE_TAG}} || true
+      - kubectl rollout restart deployment/authpractice || true
+
+  k8s-port-forward:
+    desc: Set up port forwarding for services
+    cmds:
+      - |
+        kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80 &
+        kubectl port-forward -n istio-system svc/istio-ingressgateway 8443:443 &
+        kubectl port-forward -n argocd svc/argocd-server 8081:80 &
+        echo "Port forwarding set up: Istio HTTP:8080, HTTPS:8443, ArgoCD:8081"
+
+  k8s-logs:
+    desc: Show application logs
+    cmds:
+      - kubectl logs -f deployment/authpractice -n default || kubectl logs -f deployment/authpractice-development -n authpractice-development
+
+  k8s-status:
+    desc: Show Kubernetes status
+    cmds:
+      - |
+        echo "=== Pods ==="
+        kubectl get pods -A | grep authpractice
+        echo "=== Services ==="
+        kubectl get services -A | grep authpractice
+        echo "=== Applications ==="
+        kubectl get applications -n argocd | grep authpractice
+
+  gitops-sync:
+    desc: Sync ArgoCD applications
+    cmds:
+      - argocd app sync authpractice-development --insecure || echo "Development app sync failed"
+      - argocd app sync authpractice-production --insecure || echo "Production app sync failed"
+
+  db-connect:
+    desc: Connect to PostgreSQL database
+    cmds:
+      - kubectl port-forward -n postgresql svc/postgresql 5432:5432 &
+
+  test:
+    desc: Run tests
+    dir: frontend
+    cmds:
+      - pnpm test
+
+  lint:
+    desc: Run linting
+    dir: frontend
+    cmds:
+      - pnpm lint
+
+  clean:
+    desc: Clean up project
+    cmds:
+      - rm -rf frontend/node_modules
+      - rm -rf frontend/.next
+      - docker system prune -f
+
+  help:
+    desc: Show available tasks
+    cmds:
+      - task --list-all 
