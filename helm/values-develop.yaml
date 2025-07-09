@@ -1,4 +1,6 @@
-# Values for develop environment
+# Development environment values
+# Extends base values.yaml with development-specific overrides
+
 replicaCount: 1
 
 image:
@@ -14,18 +16,39 @@ service:
 ingress:
   enabled: false
 
-resources: {}
+# Development-specific resource limits (lower than production)
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
+# Development-specific probe settings (more lenient)
 livenessProbe:
   httpGet:
     path: /
     port: http
-  initialDelaySeconds: 30
-  periodSeconds: 10
+  initialDelaySeconds: 60  # Longer initial delay for development
+  periodSeconds: 30        # Less frequent checks
+  timeoutSeconds: 10       # Longer timeout
+  failureThreshold: 5      # More failures allowed
 
 readinessProbe:
   httpGet:
     path: /
     port: http
-  initialDelaySeconds: 5
-  periodSeconds: 5 
+  initialDelaySeconds: 10  # Longer initial delay
+  periodSeconds: 10        # Less frequent checks
+  timeoutSeconds: 5        # Longer timeout
+  failureThreshold: 3      # More failures allowed
+
+# Development labels and annotations
+podLabels:
+  environment: development
+  tier: frontend
+
+podAnnotations:
+  environment: development
+  deployment-type: development 

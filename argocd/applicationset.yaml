@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: authpractice-environments
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: authpractice
+    app.kubernetes.io/part-of: gitops
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - branch: main
+                  environment: production
+                - branch: develop
+                  environment: development
+  template:
+    metadata:
+      name: 'authpractice-{{environment}}'
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: authpractice
+        app.kubernetes.io/instance: '{{environment}}'
+        environment: '{{environment}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+        argocd.argoproj.io/sync-options: PrunePropagationPolicy=foreground
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/davidagustin/authpractice.git
+        targetRevision: '{{branch}}'
+        path: helm
+        helm:
+          valueFiles:
+            - 'values-{{environment}}.yaml'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'authpractice-{{environment}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+      revisionHistoryLimit: 10 
