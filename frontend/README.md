@@ -1,160 +1,138 @@
-# AuthPractice Frontend
+# Auth Practice - Todo List Application
 
-Next.js 15 application with React 19, TypeScript, and Tailwind CSS.
+A modern React 19 Next.js 15 application with PostgreSQL integration, deployed on Kubernetes with Istio service mesh.
 
-## 🚀 Quick Start
+## Features
+
+### ✅ **Full CRUD Operations**
+- **Create**: Add new todos with title and description
+- **Read**: View all todos with filtering (All/Active/Completed)
+- **Update**: Edit todo details and toggle completion status
+- **Delete**: Remove todos with confirmation dialog
+
+### ✅ **Enhanced User Experience**
+- **Real-time feedback**: Success and error notifications
+- **Loading states**: Visual feedback during operations
+- **Form validation**: Input validation with helpful error messages
+- **Confirmation dialogs**: Safe delete operations
+- **Responsive design**: Works on desktop and mobile
+- **Dark mode support**: Built with shadcn/ui components
+
+### ✅ **Database Integration**
+- **PostgreSQL**: Persistent data storage
+- **Automatic schema initialization**: Database tables created on startup
+- **Connection pooling**: Efficient database connections
+- **Error handling**: Graceful fallbacks for database issues
+
+### ✅ **Infrastructure**
+- **Kubernetes deployment**: Containerized application
+- **Istio service mesh**: Advanced traffic management
+- **HTTPS support**: Secure communication with TLS
+- **Health checks**: Application and database monitoring
+- **Network policies**: Secure inter-service communication
+
+## Technology Stack
+
+- **Frontend**: React 19, Next.js 15, TypeScript
+- **UI Components**: shadcn/ui, Tailwind CSS
+- **Database**: PostgreSQL 17.5
+- **Container**: Docker
+- **Orchestration**: Kubernetes (k3d)
+- **Service Mesh**: Istio
+- **Package Manager**: pnpm
+
+## Quick Start
+
+### Access the Application
+
+1. **Via Istio Ingress Gateway**:
+   - HTTPS: `https://authpractice.local:8443`
+   - HTTP (redirects to HTTPS): `http://authpractice.local:8080`
+
+2. **Direct Access** (for testing):
+   - `http://localhost:3000`
+
+### API Endpoints
+
+- `GET /api/todos` - Get all todos
+- `POST /api/todos` - Create new todo
+- `PUT /api/todos/:id` - Update todo
+- `DELETE /api/todos/:id` - Delete todo
+
+### Database Schema
+
+```sql
+CREATE TABLE todos (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  completed BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## Development
 
 ### Prerequisites
+- Node.js 18+
+- pnpm
+- Docker
+- Kubernetes cluster (k3d recommended)
 
-- Node.js 18.x or 20.x
-- pnpm (recommended) or npm
-
-### Development
-
+### Local Development
 ```bash
-# Install dependencies
+cd frontend
 pnpm install
-
-# Start development server with Turbopack
-pnpm run dev
-
-# Open http://localhost:3000 in your browser
+pnpm dev
 ```
 
-### Production Build
+### Database Connection
+The application automatically connects to PostgreSQL using environment variables:
+- `POSTGRES_HOST`: Database host (default: postgresql.postgresql.svc.cluster.local)
+- `POSTGRES_PORT`: Database port (default: 5432)
+- `POSTGRES_DB`: Database name (default: authpractice)
+- `POSTGRES_USER`: Database user (default: postgres)
+- `POSTGRES_PASSWORD`: Database password (default: postgres123)
 
-```bash
-# Build for production
-pnpm run build
+## Deployment
 
-# Start production server
-pnpm run start
-```
+The application is deployed using:
+- **Helm charts** for Kubernetes deployment
+- **ArgoCD** for GitOps continuous deployment
+- **Istio** for service mesh and ingress management
+- **Cert-manager** for SSL certificate management
 
-## 🐳 Docker
+## Recent Improvements
 
-### Build Image
+### Frontend Enhancements
+- ✅ Added success notifications for all CRUD operations
+- ✅ Improved error handling with detailed error messages
+- ✅ Added confirmation dialogs for delete operations
+- ✅ Enhanced form validation with real-time feedback
+- ✅ Added loading states and disabled states during operations
+- ✅ Improved empty states and filter messaging
+- ✅ Added character counters for input fields
 
-```bash
-# Build Docker image
-docker build -t authpractice .
+### Backend Stability
+- ✅ Fixed database connection issues
+- ✅ Resolved NetworkPolicy restrictions
+- ✅ Improved error handling and logging
+- ✅ Added proper HTTP status codes
 
-# Run container
-docker run -p 3000:3000 authpractice
-```
+### Infrastructure
+- ✅ Configured Istio ingress gateway
+- ✅ Set up HTTPS with self-signed certificates
+- ✅ Implemented proper port forwarding
+- ✅ Added host resolution for local development
 
-### Using npm scripts
+## Status
 
-```bash
-# Build using npm script
-pnpm run docker:build
+🎉 **Application Status: FULLY OPERATIONAL**
 
-# Run using npm script
-pnpm run docker:run
-```
-
-## 🛠️ Available Scripts
-
-- `pnpm run dev` - Start development server with Turbopack
-- `pnpm run build` - Build for production
-- `pnpm run start` - Start production server
-- `pnpm run lint` - Run ESLint
-- `pnpm run release` - Run semantic-release
-- `pnpm run docker:build` - Build Docker image
-- `pnpm run docker:run` - Run Docker container
-
-## 📁 Project Structure
-
-```
-frontend/
-├── src/               # Source code
-│   ├── app/          # Next.js 15 app directory
-│   └── components/   # React components
-├── public/           # Static assets
-├── package.json      # Dependencies and scripts
-├── Dockerfile        # Docker configuration
-├── .dockerignore     # Docker ignore patterns
-├── tsconfig.json     # TypeScript configuration
-├── next.config.ts    # Next.js configuration
-├── tailwind.config.ts # Tailwind CSS configuration
-└── postcss.config.mjs # PostCSS configuration
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env.local` file for local development:
-
-```bash
-# Example environment variables
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
-
-### TypeScript
-
-The project uses TypeScript with strict mode enabled. Configuration is in `tsconfig.json`.
-
-### Tailwind CSS
-
-Tailwind CSS v4 is configured with PostCSS. Configuration is in `tailwind.config.ts`.
-
-## 🚀 Deployment
-
-### Docker
-
-```bash
-# Build image
-docker build -t authpractice .
-
-# For k3d local development
-k3d image import authpractice:latest
-
-# For production registry
-docker tag authpractice:latest your-registry/authpractice:latest
-docker push your-registry/authpractice:latest
-```
-
-### Kubernetes
-
-Use the Helm chart in the `../helm/` directory:
-
-```bash
-# Deploy to Kubernetes
-helm install authpractice ../helm/
-
-# Port forward to access
-kubectl port-forward svc/authpractice 8080:3000
-```
-
-## 📦 Dependencies
-
-### Production Dependencies
-
-- **Next.js 15** - React framework
-- **React 19** - UI library
-- **TypeScript** - Type safety
-
-### Development Dependencies
-
-- **Tailwind CSS v4** - Utility-first CSS framework
-- **ESLint** - Code linting
-- **Semantic Release** - Automated versioning
-
-## 🤝 Contributing
-
-Follow conventional commit standards:
-
-```
-type(scope): description
-
-Examples:
-- feat: add user authentication
-- fix: resolve login button styling
-- docs: update deployment instructions
-- chore: bump version to 0.1.1
-```
-
-## 📄 License
-
-This project is licensed under the MIT License. # Development Branch
+- ✅ Backend API: Working perfectly
+- ✅ Database: Connected and functional
+- ✅ Frontend: Enhanced with improved UX
+- ✅ Istio Gateway: Properly configured
+- ✅ CRUD Operations: All tested and working
+- ✅ Error Handling: Comprehensive and user-friendly

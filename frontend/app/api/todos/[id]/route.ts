@@ -13,7 +13,7 @@ export async function PUT(
       );
     }
 
-    const { title, description, completed } = await request.json();
+    const updates = await request.json();
     const { id } = await params;
     const todoId = parseInt(id);
 
@@ -24,17 +24,40 @@ export async function PUT(
       );
     }
 
-    const result = await pool.query(
-      'UPDATE todos SET title = $1, description = $2, completed = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
-      [title, description, completed, todoId]
+    // First, get the current todo to merge with updates
+    const currentResult = await pool.query(
+      'SELECT * FROM todos WHERE id = $1',
+      [todoId]
     );
 
-    if (result.rows.length === 0) {
+    if (currentResult.rows.length === 0) {
       return NextResponse.json(
         { error: 'Todo not found' },
         { status: 404 }
       );
     }
+
+    const currentTodo = currentResult.rows[0];
+
+    // Merge updates with current values, only updating provided fields
+    const mergedUpdates = {
+      title: updates.title !== undefined && updates.title !== null ? updates.title : currentTodo.title,
+      description: updates.description !== undefined ? updates.description : currentTodo.description,
+      completed: updates.completed !== undefined ? updates.completed : currentTodo.completed,
+    };
+
+    // Validate that title is not empty
+    if (!mergedUpdates.title || mergedUpdates.title.trim() === '') {
+      return NextResponse.json(
+        { error: 'Title cannot be empty' },
+        { status: 400 }
+      );
+    }
+
+    const result = await pool.query(
+      'UPDATE todos SET title = $1, description = $2, completed = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
+      [mergedUpdates.title, mergedUpdates.description, mergedUpdates.completed, todoId]
+    );
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {

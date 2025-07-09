@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 
 interface TodoFormProps {
   onAddTodo: (title: string, description: string) => void;
@@ -15,11 +15,25 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState('');
+
+  const validateForm = () => {
+    if (!title.trim()) {
+      setTitleError('Title is required');
+      return false;
+    }
+    if (title.trim().length > 100) {
+      setTitleError('Title must be less than 100 characters');
+      return false;
+    }
+    setTitleError('');
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) {
+    if (!validateForm()) {
       return;
     }
 
@@ -28,8 +42,16 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
       await onAddTodo(title.trim(), description.trim());
       setTitle('');
       setDescription('');
+      setTitleError('');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+    if (titleError) {
+      setTitleError('');
     }
   };
 
@@ -50,11 +72,15 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
               placeholder="Enter todo title..."
               required
               disabled={isSubmitting}
+              className={titleError ? 'border-destructive' : ''}
             />
+            {titleError && (
+              <p className="text-sm text-destructive">{titleError}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -68,7 +94,11 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
               placeholder="Enter todo description (optional)..."
               rows={3}
               disabled={isSubmitting}
+              maxLength={500}
             />
+            <p className="text-xs text-muted-foreground">
+              {description.length}/500 characters
+            </p>
           </div>
 
           <Button
@@ -76,7 +106,14 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
             disabled={isSubmitting || !title.trim()}
             className="w-full"
           >
-            {isSubmitting ? 'Adding...' : 'Add Todo'}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              'Add Todo'
+            )}
           </Button>
         </form>
       </CardContent>

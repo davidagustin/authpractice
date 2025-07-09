@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
-import { Loader2, Database, AlertCircle } from 'lucide-react';
+import { Loader2, Database, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface Todo {
   id: number;
@@ -20,17 +20,18 @@ export default function TodosPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const fetchTodos = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch('/api/todos');
       if (!response.ok) {
-        throw new Error('Failed to fetch todos');
+        throw new Error(`Failed to fetch todos: ${response.status}`);
       }
       const data = await response.json();
       setTodos(data);
-      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -40,6 +41,7 @@ export default function TodosPage() {
 
   const addTodo = async (title: string, description: string) => {
     try {
+      setError(null);
       const response = await fetch('/api/todos', {
         method: 'POST',
         headers: {
@@ -49,11 +51,13 @@ export default function TodosPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add todo');
+        throw new Error(`Failed to add todo: ${response.status}`);
       }
 
       const newTodo = await response.json();
       setTodos(prev => [newTodo, ...prev]);
+      setSuccess('Todo added successfully!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add todo');
     }
@@ -61,6 +65,7 @@ export default function TodosPage() {
 
   const updateTodo = async (id: number, updates: Partial<Todo>) => {
     try {
+      setError(null);
       const response = await fetch(`/api/todos/${id}`, {
         method: 'PUT',
         headers: {
@@ -70,13 +75,15 @@ export default function TodosPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update todo');
+        throw new Error(`Failed to update todo: ${response.status}`);
       }
 
       const updatedTodo = await response.json();
       setTodos(prev => prev.map(todo => 
         todo.id === id ? updatedTodo : todo
       ));
+      setSuccess('Todo updated successfully!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update todo');
     }
@@ -84,15 +91,18 @@ export default function TodosPage() {
 
   const deleteTodo = async (id: number) => {
     try {
+      setError(null);
       const response = await fetch(`/api/todos/${id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete todo');
+        throw new Error(`Failed to delete todo: ${response.status}`);
       }
 
       setTodos(prev => prev.filter(todo => todo.id !== id));
+      setSuccess('Todo deleted successfully!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete todo');
     }
@@ -139,6 +149,15 @@ export default function TodosPage() {
               >
                 Retry
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {success && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="flex items-center gap-2 p-4">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-green-800">{success}</span>
             </CardContent>
           </Card>
         )}

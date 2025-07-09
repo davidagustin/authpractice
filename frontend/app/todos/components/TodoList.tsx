@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import TodoItem from './TodoItem';
-import { ListTodo } from 'lucide-react';
+import { ListTodo, Plus } from 'lucide-react';
 
 interface Todo {
   id: number;
@@ -40,7 +40,11 @@ export default function TodoList({ todos, onUpdateTodo, onDeleteTodo }: TodoList
         <CardContent className="text-center py-12">
           <ListTodo className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No todos yet</h3>
-          <p className="text-muted-foreground">Add your first todo to get started!</p>
+          <p className="text-muted-foreground mb-4">Add your first todo to get started!</p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Plus className="h-4 w-4" />
+            <span>Use the form above to create your first todo</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -53,6 +57,9 @@ export default function TodoList({ todos, onUpdateTodo, onDeleteTodo }: TodoList
           <CardTitle className="flex items-center gap-2">
             <ListTodo className="h-5 w-5" />
             Your Todos
+            <Badge variant="secondary" className="ml-2">
+              {todos.length}
+            </Badge>
           </CardTitle>
           <div className="flex space-x-2">
             <Button
@@ -101,8 +108,12 @@ export default function TodoList({ todos, onUpdateTodo, onDeleteTodo }: TodoList
         </div>
 
         {filteredTodos.length === 0 && todos.length > 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No {filter} todos found.
+          <div className="text-center py-8">
+            <ListTodo className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-muted-foreground">No {filter} todos found.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Try switching to a different filter or add new todos.
+            </p>
           </div>
         )}
       </CardContent>
