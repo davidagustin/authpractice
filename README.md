@@ -29,16 +29,29 @@ git clone https://github.com/davidagustin/authpractice.git
 cd authpractice
 
 # Install dependencies
-npm install
+pnpm install
 
 # Run development server
-npm run dev
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Start production server
-npm start
+pnpm run start
+```
+
+### Project Structure
+
+```
+authpractice/
+├── frontend/           # Next.js 15 + React 19 application
+│   ├── src/           # Source code
+│   ├── public/        # Static assets
+│   └── package.json   # Frontend dependencies
+├── scripts/           # Build and deployment scripts
+├── .github/           # GitHub Actions workflows
+└── package.json       # Root workspace configuration
 ```
 
 ### Docker
@@ -54,16 +67,19 @@ docker run -p 3000:3000 authpractice
 ## 📋 Prerequisites
 
 - Node.js 18.x or 20.x
-- npm or yarn
+- pnpm (recommended) or npm
 - Docker (optional)
 
 ## 🛠️ Available Scripts
 
-- `npm run dev` - Start development server with Turbopack
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run release` - Run semantic-release
+- `pnpm run dev` - Start development server with Turbopack
+- `pnpm run build` - Build for production
+- `pnpm run start` - Start production server
+- `pnpm run lint` - Run ESLint
+- `pnpm run release` - Run semantic-release
+- `pnpm run docker:build` - Build Docker image
+- `pnpm run docker:push` - Push to GitHub Container Registry
+- `pnpm run docker:run` - Run Docker container
 
 ## 🤝 Contributing
 

@@ -1,15 +1,15 @@
 # Install dependencies only when needed
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY frontend/package.json ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
+COPY frontend/ .
+RUN npm install -g pnpm && pnpm run build
 
 # Production image, copy all the files and run next
 FROM node:20-alpine AS runner
@@ -27,4 +27,4 @@ COPY --from=builder /app/package.json ./package.json
 USER nextjs
 
 EXPOSE 3000
-CMD ["npm", "start"] 
+CMD ["pnpm", "start"] 

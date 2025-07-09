@@ -26,6 +26,7 @@ This project follows **Trunk-Based Development** methodology. Here's how to cont
    - Write clear, descriptive commit messages using conventional commits
    - Keep commits small and focused
    - Test your changes thoroughly
+   - Use pnpm for package management
 
 4. **Push your branch** and create a Pull Request:
    ```bash
