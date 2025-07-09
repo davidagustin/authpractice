@@ -1,6 +1,6 @@
 apiVersion: v2
 name: authpractice
-description: A Helm chart for the AuthPractice Next.js application
+description: A Helm chart for AuthPractice application
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -17,12 +17,7 @@ type: application
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 
 
-version: 0.1.3
-
-version: 0.1.2
-
-version: 0.1.3
-
+version: 0.1.4
 
 
 # This is the version number of the application being deployed. This version number should be
@@ -31,10 +26,5 @@ version: 0.1.3
 # It is recommended to use it with quotes.
 
 
-appVersion: "0.1.3"
-
-appVersion: "0.1.2"
-
-
-appVersion: "0.1.3"
+appVersion: "0.1.4"
 
