@@ -12,6 +12,9 @@ interface Todo {
   title: string;
   description: string;
   completed: boolean;
+  due_date?: string | null;
+  priority?: 'low' | 'medium' | 'high';
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -24,10 +27,16 @@ interface TodoListProps {
 
 export default function TodoList({ todos, onUpdateTodo, onDeleteTodo }: TodoListProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('');
+  const [dueDateFilter, setDueDateFilter] = useState<string>('');
 
   const filteredTodos = todos.filter(todo => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
+    if (filter === 'active' && todo.completed) return false;
+    if (filter === 'completed' && !todo.completed) return false;
+    if (priorityFilter !== 'all' && todo.priority !== priorityFilter) return false;
+    if (tagFilter && (!todo.tags || !todo.tags.includes(tagFilter))) return false;
+    if (dueDateFilter && todo.due_date !== dueDateFilter) return false;
     return true;
   });
 
@@ -96,6 +105,27 @@ export default function TodoList({ todos, onUpdateTodo, onDeleteTodo }: TodoList
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex gap-2 mb-4">
+          <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)} className="border rounded px-2 py-1">
+            <option value="all">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <input
+            type="text"
+            value={tagFilter}
+            onChange={e => setTagFilter(e.target.value)}
+            placeholder="Filter by tag"
+            className="border rounded px-2 py-1"
+          />
+          <input
+            type="date"
+            value={dueDateFilter}
+            onChange={e => setDueDateFilter(e.target.value)}
+            className="border rounded px-2 py-1"
+          />
+        </div>
         <div className="space-y-4">
           {filteredTodos.map(todo => (
             <TodoItem

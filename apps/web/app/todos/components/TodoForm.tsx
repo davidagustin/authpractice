@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Loader2 } from 'lucide-react';
 
 interface TodoFormProps {
-  onAddTodo: (title: string, description: string) => void;
+  onAddTodo: (title: string, description: string, due_date?: string, priority?: 'low' | 'medium' | 'high', tags?: string[]) => void;
 }
 
 export default function TodoForm({ onAddTodo }: TodoFormProps) {
@@ -16,6 +16,9 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [titleError, setTitleError] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [tags, setTags] = useState<string>('');
 
   const validateForm = () => {
     if (!title.trim()) {
@@ -39,9 +42,12 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
 
     setIsSubmitting(true);
     try {
-      await onAddTodo(title.trim(), description.trim());
+      await onAddTodo(title.trim(), description.trim(), dueDate || undefined, priority, tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : undefined);
       setTitle('');
       setDescription('');
+      setDueDate('');
+      setPriority('medium');
+      setTags('');
       setTitleError('');
     } finally {
       setIsSubmitting(false);
@@ -99,6 +105,41 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
             <p className="text-xs text-muted-foreground">
               {description.length}/500 characters
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="due_date" className="text-sm font-medium">Due Date</label>
+            <Input
+              id="due_date"
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="priority" className="text-sm font-medium">Priority</label>
+            <select
+              id="priority"
+              value={priority}
+              onChange={e => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+              disabled={isSubmitting}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="tags" className="text-sm font-medium">Tags (comma separated)</label>
+            <Input
+              id="tags"
+              value={tags}
+              onChange={e => setTags(e.target.value)}
+              placeholder="e.g. work, urgent, home"
+              disabled={isSubmitting}
+            />
           </div>
 
           <Button

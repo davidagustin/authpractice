@@ -14,6 +14,9 @@ interface Todo {
   title: string;
   description: string;
   completed: boolean;
+  due_date?: string | null;
+  priority?: 'low' | 'medium' | 'high';
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +33,9 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
   const [editDescription, setEditDescription] = useState(todo.description);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editDueDate, setEditDueDate] = useState(todo.due_date || '');
+  const [editPriority, setEditPriority] = useState<'low' | 'medium' | 'high'>(todo.priority || 'medium');
+  const [editTags, setEditTags] = useState<string>(todo.tags ? todo.tags.join(', ') : '');
 
   const handleToggleComplete = async () => {
     await onUpdate(todo.id, { completed: !todo.completed });
@@ -43,6 +49,9 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
       await onUpdate(todo.id, {
         title: editTitle.trim(),
         description: editDescription.trim(),
+        due_date: editDueDate || null,
+        priority: editPriority,
+        tags: editTags ? editTags.split(',').map(t => t.trim()).filter(Boolean) : null,
       });
       setIsEditing(false);
     } finally {
@@ -53,6 +62,9 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
   const handleCancel = () => {
     setEditTitle(todo.title);
     setEditDescription(todo.description);
+    setEditDueDate(todo.due_date || '');
+    setEditPriority(todo.priority || 'medium');
+    setEditTags(todo.tags ? todo.tags.join(', ') : '');
     setIsEditing(false);
   };
 
@@ -104,6 +116,32 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
                     className="min-h-[60px]"
                     disabled={isUpdating}
                   />
+                  <div className="flex gap-2">
+                    <Input
+                      type="date"
+                      value={editDueDate}
+                      onChange={e => setEditDueDate(e.target.value)}
+                      disabled={isUpdating}
+                      className="w-40"
+                    />
+                    <select
+                      value={editPriority}
+                      onChange={e => setEditPriority(e.target.value as 'low' | 'medium' | 'high')}
+                      disabled={isUpdating}
+                      className="w-32 border rounded px-2"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                    <Input
+                      value={editTags}
+                      onChange={e => setEditTags(e.target.value)}
+                      placeholder="Tags (comma separated)"
+                      disabled={isUpdating}
+                      className="w-48"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="flex-1">
@@ -119,6 +157,11 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
                       {todo.description}
                     </p>
                   )}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {todo.due_date && <Badge variant="outline" className="text-xs">Due: {todo.due_date}</Badge>}
+                    {todo.priority && <Badge variant={todo.priority === 'high' ? 'destructive' : todo.priority === 'low' ? 'secondary' : 'default'} className="text-xs">{todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)} Priority</Badge>}
+                    {todo.tags && todo.tags.map(tag => <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>)}
+                  </div>
                 </div>
               )}
             </div>

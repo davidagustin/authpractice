@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '../../../../lib/auth';
 import pool from '../../../../lib/db';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
   try {
     if (!pool) {
       return NextResponse.json(
@@ -44,6 +54,9 @@ export async function PUT(
       title: updates.title !== undefined && updates.title !== null ? updates.title : currentTodo.title,
       description: updates.description !== undefined ? updates.description : currentTodo.description,
       completed: updates.completed !== undefined ? updates.completed : currentTodo.completed,
+      due_date: updates.due_date !== undefined ? updates.due_date : currentTodo.due_date,
+      priority: updates.priority !== undefined ? updates.priority : currentTodo.priority,
+      tags: updates.tags !== undefined ? updates.tags : currentTodo.tags,
     };
 
     // Validate that title is not empty
@@ -55,8 +68,8 @@ export async function PUT(
     }
 
     const result = await pool.query(
-      'UPDATE todos SET title = $1, description = $2, completed = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
-      [mergedUpdates.title, mergedUpdates.description, mergedUpdates.completed, todoId]
+      'UPDATE todos SET title = $1, description = $2, completed = $3, due_date = $4, priority = $5, tags = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING *',
+      [mergedUpdates.title, mergedUpdates.description, mergedUpdates.completed, mergedUpdates.due_date, mergedUpdates.priority, mergedUpdates.tags, todoId]
     );
 
     return NextResponse.json(result.rows[0]);
@@ -87,6 +100,15 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
   try {
     if (!pool) {
       return NextResponse.json(
@@ -128,6 +150,45 @@ export async function DELETE(
     
     return NextResponse.json(
       { error: 'Failed to delete todo' },
+      { status: 500 }
+    );
+  }
+} 
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    if (!pool) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 503 }
+      );
+    }
+    const { id } = await params;
+    const todoId = parseInt(id);
+    if (isNaN(todoId)) {
+      return NextResponse.json(
+        { error: 'Invalid todo ID' },
+        { status: 400 }
+      );
+    }
+    const result = await pool.query(
+      'SELECT * FROM todos WHERE id = $1',
+      [todoId]
+    );
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Todo not found' },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching todo:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch todo' },
       { status: 500 }
     );
   }

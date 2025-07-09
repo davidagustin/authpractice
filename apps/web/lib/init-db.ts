@@ -14,6 +14,11 @@ export async function initDatabase() {
     
     await pool.query(schema);
     console.log('Database schema initialized successfully');
+
+    // Add new columns if they don't exist
+    await pool.query(`ALTER TABLE todos ADD COLUMN IF NOT EXISTS due_date DATE`);
+    await pool.query(`ALTER TABLE todos ADD COLUMN IF NOT EXISTS priority VARCHAR(10) DEFAULT 'medium'`);
+    await pool.query(`ALTER TABLE todos ADD COLUMN IF NOT EXISTS tags TEXT[]`);
   } catch (error) {
     console.error('Error initializing database:', error);
     // Don't throw error in development - just log it

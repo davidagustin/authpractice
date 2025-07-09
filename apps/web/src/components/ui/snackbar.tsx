@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -80,7 +80,17 @@ export interface SnackbarContextType {
   showSnackbar: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
+const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
+
 export function useSnackbar() {
+  const context = useContext(SnackbarContext);
+  if (context === undefined) {
+    throw new Error('useSnackbar must be used within a SnackbarProvider');
+  }
+  return context;
+}
+
+export function SnackbarProvider({ children }: { children: React.ReactNode }) {
   const [snackbars, setSnackbars] = useState<Array<SnackbarProps & { id: string }>>([]);
 
   const showSnackbar = (message: string, type: 'success' | 'error' | 'info') => {
@@ -94,18 +104,8 @@ export function useSnackbar() {
     setSnackbars(prev => prev.filter(snackbar => snackbar.id !== id));
   };
 
-  return {
-    snackbars,
-    showSnackbar,
-    removeSnackbar,
-  };
-}
-
-export function SnackbarProvider({ children }: { children: React.ReactNode }) {
-  const { snackbars, removeSnackbar } = useSnackbar();
-
   return (
-    <>
+    <SnackbarContext.Provider value={{ showSnackbar }}>
       {children}
       <div className="fixed top-0 right-0 z-50 space-y-2 p-4">
         {snackbars.map((snackbar) => (
@@ -117,6 +117,6 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
           />
         ))}
       </div>
-    </>
+    </SnackbarContext.Provider>
   );
 } 

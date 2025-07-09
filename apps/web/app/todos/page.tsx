@@ -1,22 +1,28 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { Card, CardContent } from '@/components/ui/card';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
 import { SnackbarProvider, useSnackbar } from '@/components/ui/snackbar';
-import { Loader2, Database } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Database, LogOut, User } from 'lucide-react';
 
 interface Todo {
   id: number;
   title: string;
   description: string;
   completed: boolean;
+  due_date?: string | null;
+  priority?: 'low' | 'medium' | 'high';
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
 }
 
 function TodosPageContent() {
+  const { data: session, status } = useSession();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const { showSnackbar } = useSnackbar();
@@ -35,16 +41,16 @@ function TodosPageContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showSnackbar]);
 
-  const addTodo = async (title: string, description: string) => {
+  const addTodo = async (title: string, description: string, due_date?: string, priority?: 'low' | 'medium' | 'high', tags?: string[]) => {
     try {
       const response = await fetch('/api/todos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({ title, description, due_date, priority, tags }),
       });
 
       if (!response.ok) {
@@ -101,8 +107,38 @@ function TodosPageContent() {
   };
 
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    if (status === 'authenticated') {
+      fetchTodos();
+    }
+  }, [status, fetchTodos]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-96">
+          <CardContent className="text-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-96">
+          <CardContent className="text-center py-12">
+            <p className="text-muted-foreground mb-4">Please sign in to access your todos</p>
+            <Button onClick={() => window.location.href = '/auth/signin'}>
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -120,15 +156,31 @@ function TodosPageContent() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4 space-y-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2">Todo List</h1>
-          <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <Database className="h-4 w-4" />
-            <span>Sync with PostgreSQL database</span>
+        <div className="flex items-center justify-between">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold mb-2">Todo List</h1>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <Database className="h-4 w-4" />
+              <span>Sync with PostgreSQL database</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <User className="h-4 w-4" />
+              <span>{session?.user?.username}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
-
-
 
         <TodoForm onAddTodo={addTodo} />
         <TodoList
