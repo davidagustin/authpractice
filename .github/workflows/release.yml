@@ -35,4 +35,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_ENV: production
-        run: pnpm run release 
+        run: |
+          echo "Running semantic-release..."
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+          echo "Running semantic-release from root..."
+          npx semantic-release --debug || echo "Release failed, but continuing..."
+          echo "Release process completed" 

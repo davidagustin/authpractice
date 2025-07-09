@@ -10,5 +10,6 @@
     }],
     "@semantic-release/git",
     "@semantic-release/github"
-  ]
+  ],
+  "tagFormat": "v${version}"
 } 
