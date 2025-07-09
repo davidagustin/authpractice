@@ -35,4 +35,4 @@ spec:
     - "authpractice-prod.local"
     tls:
       mode: SIMPLE
-      credentialName: authpractice-tls 
+      credentialName: istio-ingressgateway-certs 

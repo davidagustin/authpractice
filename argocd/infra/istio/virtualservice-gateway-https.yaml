@@ -1,0 +1,36 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authpractice-vs-gateway-https
+  namespace: default
+spec:
+  gateways:
+  - istio-system/authpractice-gateway-https
+  hosts:
+  - "authpractice.local"
+  - "authpractice.default.svc.cluster.local"
+  http:
+  - corsPolicy:
+      allowHeaders:
+      - content-type
+      - authorization
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowOrigins:
+      - exact: https://localhost:18443
+      - exact: https://localhost:32001
+      - exact: https://localhost:32000
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    route:
+    - destination:
+        host: authpractice.default.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100
+    timeout: 10s 

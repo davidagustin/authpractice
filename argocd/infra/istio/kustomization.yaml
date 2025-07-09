@@ -14,6 +14,7 @@ resources:
   
   # Virtual Services
   - virtualservice-gateway.yaml
+  - virtualservice-gateway-https.yaml
   - ambient-config.yaml
   
   # Destination Rules
