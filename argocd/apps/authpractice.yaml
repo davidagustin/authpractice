@@ -15,7 +15,7 @@ spec:
       # Use chart version instead of latest tag
       values: |
         image:
-          tag: "0.1.1"
+          tag: "0.1.2"
   destination:
     server: https://kubernetes.default.svc
     namespace: authpractice
