@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
-import { Loader2, Database, AlertCircle, CheckCircle } from 'lucide-react';
+import { SnackbarProvider, useSnackbar } from '@/components/ui/snackbar';
+import { Loader2, Database, AlertCircle } from 'lucide-react';
 
 interface Todo {
   id: number;
@@ -16,16 +17,14 @@ interface Todo {
   updated_at: string;
 }
 
-export default function TodosPage() {
+function TodosPageContent() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   const fetchTodos = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await fetch('/api/todos');
       if (!response.ok) {
         throw new Error(`Failed to fetch todos: ${response.status}`);
@@ -33,7 +32,7 @@ export default function TodosPage() {
       const data = await response.json();
       setTodos(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      showSnackbar(err instanceof Error ? err.message : 'An error occurred', 'error');
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,6 @@ export default function TodosPage() {
 
   const addTodo = async (title: string, description: string) => {
     try {
-      setError(null);
       const response = await fetch('/api/todos', {
         method: 'POST',
         headers: {
@@ -56,16 +54,14 @@ export default function TodosPage() {
 
       const newTodo = await response.json();
       setTodos(prev => [newTodo, ...prev]);
-      setSuccess('Todo added successfully!');
-      setTimeout(() => setSuccess(null), 3000);
+      showSnackbar('Todo added successfully!', 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add todo');
+      showSnackbar(err instanceof Error ? err.message : 'Failed to add todo', 'error');
     }
   };
 
   const updateTodo = async (id: number, updates: Partial<Todo>) => {
     try {
-      setError(null);
       const response = await fetch(`/api/todos/${id}`, {
         method: 'PUT',
         headers: {
@@ -82,16 +78,14 @@ export default function TodosPage() {
       setTodos(prev => prev.map(todo => 
         todo.id === id ? updatedTodo : todo
       ));
-      setSuccess('Todo updated successfully!');
-      setTimeout(() => setSuccess(null), 3000);
+      showSnackbar('Todo updated successfully!', 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update todo');
+      showSnackbar(err instanceof Error ? err.message : 'Failed to update todo', 'error');
     }
   };
 
   const deleteTodo = async (id: number) => {
     try {
-      setError(null);
       const response = await fetch(`/api/todos/${id}`, {
         method: 'DELETE',
       });
@@ -101,10 +95,9 @@ export default function TodosPage() {
       }
 
       setTodos(prev => prev.filter(todo => todo.id !== id));
-      setSuccess('Todo deleted successfully!');
-      setTimeout(() => setSuccess(null), 3000);
+      showSnackbar('Todo deleted successfully!', 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete todo');
+      showSnackbar(err instanceof Error ? err.message : 'Failed to delete todo', 'error');
     }
   };
 
@@ -136,31 +129,7 @@ export default function TodosPage() {
           </div>
         </div>
 
-        {error && (
-          <Card className="border-destructive">
-            <CardContent className="flex items-center gap-2 p-4">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <span className="text-destructive">{error}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchTodos}
-                className="ml-auto"
-              >
-                Retry
-              </Button>
-            </CardContent>
-          </Card>
-        )}
 
-        {success && (
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="flex items-center gap-2 p-4">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-green-800">{success}</span>
-            </CardContent>
-          </Card>
-        )}
 
         <TodoForm onAddTodo={addTodo} />
         <TodoList
@@ -170,5 +139,13 @@ export default function TodosPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function TodosPage() {
+  return (
+    <SnackbarProvider>
+      <TodosPageContent />
+    </SnackbarProvider>
   );
 } 
