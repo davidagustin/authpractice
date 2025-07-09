@@ -12,6 +12,10 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      # Use chart version instead of latest tag
+      values: |
+        image:
+          tag: "0.1.1"
   destination:
     server: https://kubernetes.default.svc
     namespace: authpractice
