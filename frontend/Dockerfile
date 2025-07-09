@@ -14,6 +14,7 @@ RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm ins
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV HTTPS=true
 
 # Don't run as root
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
@@ -25,5 +26,5 @@ COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 
-EXPOSE 3000
-CMD ["pnpm", "start"] 
+EXPOSE 3000 3001
+CMD ["pnpm", "start:https"] 

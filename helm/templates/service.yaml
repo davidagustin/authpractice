@@ -11,5 +11,15 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+    - port: {{ .Values.service.httpsPort | default 3001 }}
+      targetPort: https
+      protocol: TCP
+      name: https
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.httpsNodePort | default 32001 }}
+      {{- end }}
   selector:
     {{- include "authpractice.selectorLabels" . | nindent 4 }}

@@ -1,13 +1,15 @@
 {
   "name": "authpractice",
   "description": "A React 19 Next.js 15 authentication practice application",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:https": "HTTPS=true next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "start:https": "HTTPS=true next start",
     "lint": "next lint",
     "release": "semantic-release",
     "docker:build": "docker build -t authpractice .",

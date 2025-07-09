@@ -22,9 +22,10 @@ resources:
   # Authorization Policies
   - authorizationpolicy.yaml
 
-commonLabels:
-  app.kubernetes.io/name: istio
-  app.kubernetes.io/part-of: service-mesh
-  app.kubernetes.io/version: "1.26.2"
+labels:
+- pairs:
+    app.kubernetes.io/name: istio
+    app.kubernetes.io/part-of: service-mesh
+    app.kubernetes.io/version: "1.26.2"
 
 namespace: istio-system 

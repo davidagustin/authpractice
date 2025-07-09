@@ -9,6 +9,7 @@ spec:
   - "authpractice.default.svc.cluster.local"
   gateways:
   - istio-system/authpractice-gateway
+  - istio-system/authpractice-gateway-https
   http:
   - route:
     - destination:
@@ -24,6 +25,8 @@ spec:
       allowOrigins:
       - exact: "http://localhost:32001"
       - exact: "http://localhost:32000"
+      - exact: "https://localhost:32001"
+      - exact: "https://localhost:32000"
       allowMethods:
       - GET
       - POST
@@ -45,6 +48,7 @@ spec:
   - "authpractice.authpractice.svc.cluster.local"
   gateways:
   - istio-system/authpractice-gateway
+  - istio-system/authpractice-gateway-https
   http:
   - route:
     - destination:
@@ -60,6 +64,8 @@ spec:
       allowOrigins:
       - exact: "http://localhost:32001"
       - exact: "http://localhost:32000"
+      - exact: "https://localhost:32001"
+      - exact: "https://localhost:32000"
       allowMethods:
       - GET
       - POST

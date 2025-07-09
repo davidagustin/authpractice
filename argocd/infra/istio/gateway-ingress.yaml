@@ -14,7 +14,8 @@ spec:
     hosts:
     - "authpractice.local"
     - "authpractice-prod.local"
-    - "*"
+    tls:
+      httpsRedirect: true
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
@@ -29,9 +30,9 @@ spec:
       number: 443
       name: https
       protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: authpractice-cert
     hosts:
     - "authpractice.local"
-    - "authpractice-prod.local" 
+    - "authpractice-prod.local"
+    tls:
+      mode: SIMPLE
+      credentialName: authpractice-tls 

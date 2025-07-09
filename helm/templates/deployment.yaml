@@ -44,6 +44,14 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            - name: https
+              containerPort: {{ .Values.service.httpsPort | default 3001 }}
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_EXPERIMENTAL_HTTPS
+              value: "true"
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

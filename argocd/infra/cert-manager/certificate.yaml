@@ -1,0 +1,29 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: authpractice-cert
+  namespace: default
+spec:
+  secretName: authpractice-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - authpractice.local
+  - "*.authpractice.local"
+  - authpractice.default.svc.cluster.local
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: authpractice-prod-cert
+  namespace: authpractice
+spec:
+  secretName: authpractice-prod-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - authpractice-prod.local
+  - "*.authpractice-prod.local"
+  - authpractice.authpractice.svc.cluster.local 
