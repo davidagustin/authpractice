@@ -6,12 +6,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME.git'
+    repoURL: 'https://github.com/davidagustin/authpractice.git'
     targetRevision: develop
     path: helm
     helm:
       valueFiles:
-        - values.yaml
+        - values-develop.yaml
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: authpractice-develop

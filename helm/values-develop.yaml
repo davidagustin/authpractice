@@ -1,0 +1,31 @@
+# Values for develop environment
+replicaCount: 1
+
+image:
+  repository: authpractice
+  pullPolicy: IfNotPresent
+  tag: "0.1.4"
+
+service:
+  type: NodePort
+  port: 3000
+  nodePort: 32001  # Different NodePort for develop environment
+
+ingress:
+  enabled: false
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5 
