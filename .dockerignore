@@ -27,7 +27,6 @@ Dockerfile
 .env.production.local
 
 # Package manager
-pnpm-lock.yaml
 .pnpm-store
 package-lock.json
 yarn.lock

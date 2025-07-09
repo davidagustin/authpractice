@@ -9,7 +9,6 @@
     "lint": "pnpm --filter authpractice lint",
     "release": "semantic-release",
     "docker:build": "docker build -t authpractice .",
-    "docker:push": "./scripts/push-to-ghcr.sh",
     "docker:run": "docker run -d -p 3000:3000 --name authpractice_container authpractice"
   },
   "devDependencies": {

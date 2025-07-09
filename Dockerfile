@@ -1,18 +1,17 @@
-# Install dependencies only when needed
-FROM node:20-alpine AS deps
+# Install pnpm globally
+FROM node:20-alpine AS base
+RUN npm install -g pnpm
+
+# Build the application
+FROM base AS builder
 WORKDIR /app
 COPY frontend/package.json ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
-
-# Rebuild the source code only when needed
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY pnpm-lock.yaml ./
 COPY frontend/ .
-RUN npm install -g pnpm && pnpm run build
+RUN pnpm install --frozen-lockfile=false && pnpm run build
 
-# Production image, copy all the files and run next
-FROM node:20-alpine AS runner
+# Production image
+FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 

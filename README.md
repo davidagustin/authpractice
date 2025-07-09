@@ -56,6 +56,8 @@ authpractice/
 
 ### Docker
 
+#### Local Development
+
 ```bash
 # Build Docker image
 docker build -t authpractice .
@@ -63,6 +65,16 @@ docker build -t authpractice .
 # Run container
 docker run -p 3000:3000 authpractice
 ```
+
+#### Automated Deployment
+
+Docker images are automatically built and pushed to GitHub Container Registry via GitHub Actions:
+
+- **On push to main/develop**: Builds and pushes with branch tags
+- **On tags (v*)**: Builds and pushes with semantic version tags
+- **On PRs**: Builds but doesn't push (for testing)
+
+Images are available at: `ghcr.io/davidagustin/authpractice`
 
 ## 📋 Prerequisites
 
@@ -78,7 +90,6 @@ docker run -p 3000:3000 authpractice
 - `pnpm run lint` - Run ESLint
 - `pnpm run release` - Run semantic-release
 - `pnpm run docker:build` - Build Docker image
-- `pnpm run docker:push` - Push to GitHub Container Registry
 - `pnpm run docker:run` - Run Docker container
 
 ## 🤝 Contributing
