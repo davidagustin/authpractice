@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgres
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: 13.2.31
+    helm:
+      values: |
+        auth:
+          postgresPassword: "postgres123"
+          database: "authpractice"
+        primary:
+          persistence:
+            enabled: true
+            size: 8Gi
+        readReplicas:
+          persistence:
+            enabled: true
+            size: 8Gi
+        metrics:
+          enabled: true
+        volumePermissions:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: postgres
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true 
