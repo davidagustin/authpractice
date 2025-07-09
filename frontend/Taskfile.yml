@@ -1,0 +1,6 @@
+version: '3'
+tasks:
+  k3d-image-import:
+    desc: Import the latest Docker image into the k3d cluster
+    cmds:
+      - k3d image import authpractice:latest -c authpractice-cluster 

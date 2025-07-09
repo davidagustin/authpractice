@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
 import { SnackbarProvider, useSnackbar } from '@/components/ui/snackbar';
-import { Loader2, Database, AlertCircle } from 'lucide-react';
+import { Loader2, Database } from 'lucide-react';
 
 interface Todo {
   id: number;
@@ -22,7 +21,7 @@ function TodosPageContent() {
   const [loading, setLoading] = useState(true);
   const { showSnackbar } = useSnackbar();
 
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/todos');
@@ -36,7 +35,7 @@ function TodosPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const addTodo = async (title: string, description: string) => {
     try {
