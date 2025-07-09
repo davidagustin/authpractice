@@ -8,33 +8,40 @@ vars:
 tasks:
   dev:
     desc: Start development server
-    dir: frontend
+    dir: apps/web
     cmds:
       - pnpm install
       - pnpm dev
 
   install:
     desc: Install dependencies
-    dir: frontend
+    dir: apps/web
     cmds:
       - pnpm install
 
   build:
     desc: Build Docker image
     cmds:
-      - docker build -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} frontend/
+      - docker build -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} apps/web/
+
+  setup:
+    desc: Set up development environment
+    cmds:
+      - task install
+      - echo "✅ Setup complete! Run 'task dev' to start development"
 
   docker-clean:
     desc: Clean up Docker resources
     cmds:
-      - ./scripts/cleanup-docker.sh
+      - docker stop $(docker ps -a -q --filter "name=authpractice") 2>/dev/null || true
+      - docker rm $(docker ps -a -q --filter "name=authpractice") 2>/dev/null || true
+      - docker rmi $(docker images -q --filter "reference=authpractice*") 2>/dev/null || true
+      - docker system prune -f
 
   docker-prune:
     desc: Prune all unused Docker resources
     cmds:
       - docker system prune -a -f
-      - docker builder prune -f
-      - docker volume prune -f
 
   k8s-deploy:
     desc: Deploy to Kubernetes
@@ -45,13 +52,12 @@ tasks:
       - kubectl rollout restart deployment/authpractice || true
 
   k8s-port-forward:
-    desc: Set up port forwarding for services
+    desc: Show port-forward commands for services
     cmds:
       - |
-        kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80 &
-        kubectl port-forward -n istio-system svc/istio-ingressgateway 8443:443 &
-        kubectl port-forward -n argocd svc/argocd-server 8081:80 &
-        echo "Port forwarding set up: Istio HTTP:8080, HTTPS:8443, ArgoCD:8081"
+        echo "Run these in separate terminals:"
+        echo "kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80"
+        echo "kubectl port-forward -n argocd svc/argocd-server 8081:80"
 
   k8s-logs:
     desc: Show application logs
@@ -61,13 +67,8 @@ tasks:
   k8s-status:
     desc: Show Kubernetes status
     cmds:
-      - |
-        echo "=== Pods ==="
-        kubectl get pods -A | grep authpractice
-        echo "=== Services ==="
-        kubectl get services -A | grep authpractice
-        echo "=== Applications ==="
-        kubectl get applications -n argocd | grep authpractice
+      - kubectl get pods -A | grep authpractice
+      - kubectl get services -A | grep authpractice
 
   gitops-sync:
     desc: Sync ArgoCD applications
@@ -82,24 +83,36 @@ tasks:
 
   test:
     desc: Run tests
-    dir: frontend
+    dir: apps/web
     cmds:
       - pnpm test
 
   lint:
     desc: Run linting
-    dir: frontend
+    dir: apps/web
     cmds:
       - pnpm lint
+
+  type-check:
+    desc: Run TypeScript type checking
+    dir: apps/web
+    cmds:
+      - pnpm tsc --noEmit
+
+  db-init:
+    desc: Initialize database schema
+    dir: apps/web
+    cmds:
+      - pnpm db:init
 
   clean:
     desc: Clean up project
     cmds:
-      - rm -rf frontend/node_modules
-      - rm -rf frontend/.next
+      - rm -rf apps/web/node_modules
+      - rm -rf apps/web/.next
       - docker system prune -f
 
   help:
     desc: Show available tasks
     cmds:
-      - task --list-all 
+      - task --list-all
