@@ -1,0 +1,87 @@
+# Simple VirtualService for ambient mode
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authpractice-vs
+  namespace: default
+spec:
+  hosts:
+  - "authpractice.default.svc.cluster.local"
+  http:
+  - route:
+    - destination:
+        host: authpractice.default.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    timeout: 10s
+---
+# Simple VirtualService for production namespace
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authpractice-vs-prod
+  namespace: authpractice
+spec:
+  hosts:
+  - "authpractice.authpractice.svc.cluster.local"
+  http:
+  - route:
+    - destination:
+        host: authpractice.authpractice.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    timeout: 10s
+---
+# DestinationRule for traffic management
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: authpractice-dr
+  namespace: default
+spec:
+  host: authpractice.default.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 1024
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 10
+---
+# DestinationRule for production
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: authpractice-dr-prod
+  namespace: authpractice
+spec:
+  host: authpractice.authpractice.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 1024
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 10 

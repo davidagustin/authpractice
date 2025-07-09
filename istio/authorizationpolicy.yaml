@@ -1,0 +1,49 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: authpractice-auth
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: authpractice
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/default"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/api/*"]
+  - from:
+    - source:
+        namespaces: ["default"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: authpractice-auth-prod
+  namespace: authpractice
+spec:
+  selector:
+    matchLabels:
+      app: authpractice
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/authpractice/sa/default"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/api/*"]
+  - from:
+    - source:
+        namespaces: ["authpractice"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/*"] 
