@@ -58,8 +58,8 @@ service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 3000
   httpsPort: 3001
-  nodePort: 32000
-  httpsNodePort: 32001
+  nodePort: 32002
+  httpsNodePort: 32003
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
