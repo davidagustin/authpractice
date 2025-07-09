@@ -11,7 +11,7 @@ image:
 service:
   type: NodePort
   port: 3000
-  nodePort: 32003  # Different NodePort for develop environment
+  nodePort: 32004  # Different NodePort for develop environment
 
 ingress:
   enabled: false
