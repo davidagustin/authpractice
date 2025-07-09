@@ -1,6 +1,6 @@
 # AuthPractice
 
-A modern Next.js 15 application with React 19, TypeScript, and Docker support, following trunk-based development methodology.
+A modern Next.js 15 application with React 19, TypeScript, and Docker support, deployed to Kubernetes using Helm.
 
 ## 🚀 Features
 
@@ -8,25 +8,33 @@ A modern Next.js 15 application with React 19, TypeScript, and Docker support, f
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **Docker** containerization
-- **Semantic Release** for automated versioning
-- **Trunk-Based Development** workflow
-- **CI/CD** with GitHub Actions
+- **Kubernetes** deployment with Helm
+- **Conventional Commits** for versioning
 
-## 🏗️ Development Workflow
+## 🏗️ Project Structure
 
-This project follows **Trunk-Based Development**:
+```
+authpractice/
+├── frontend/           # Next.js 15 + React 19 application
+│   ├── src/           # Source code
+│   ├── public/        # Static assets
+│   ├── package.json   # Dependencies and scripts
+│   └── Dockerfile     # Docker configuration
+├── helm/              # Helm chart for Kubernetes deployment
+│   ├── templates/     # Kubernetes manifests
+│   ├── values.yaml    # Chart configuration
+│   └── Chart.yaml     # Chart metadata
+└── README.md          # This file
+```
 
-- **Main Branch**: Always deployable, production-ready code
-- **Short-lived Feature Branches**: For features, bug fixes, and improvements
-- **Continuous Integration**: Automated testing and deployment
-- **Semantic Versioning**: Automated releases based on conventional commits
+## 🚀 Quick Start
 
-### Quick Start
+### Local Development
 
 ```bash
 # Clone the repository
 git clone https://github.com/davidagustin/authpractice.git
-cd authpractice
+cd authpractice/frontend
 
 # Install dependencies
 pnpm install
@@ -41,48 +49,42 @@ pnpm run build
 pnpm run start
 ```
 
-### Project Structure
-
-```
-authpractice/
-├── frontend/           # Next.js 15 + React 19 application
-│   ├── src/           # Source code
-│   ├── public/        # Static assets
-│   └── package.json   # Frontend dependencies
-├── scripts/           # Build and deployment scripts
-├── .github/           # GitHub Actions workflows
-└── package.json       # Root workspace configuration
-```
-
-### Docker
-
-#### Local Development
+### Docker Development
 
 ```bash
-# Build Docker image
+# Build Docker image (from frontend directory)
+cd frontend
 docker build -t authpractice .
 
 # Run container
 docker run -p 3000:3000 authpractice
 ```
 
-#### Automated Deployment
+### Kubernetes Deployment
 
-Docker images are automatically built and pushed to GitHub Container Registry via GitHub Actions:
+```bash
+# Build and import image to k3d (if using k3d)
+docker build -t authpractice:latest frontend/
+k3d image import authpractice:latest
 
-- **On push to main/develop**: Builds and pushes with branch tags
-- **On tags (v*)**: Builds and pushes with semantic version tags
-- **On PRs**: Builds but doesn't push (for testing)
+# Deploy using Helm
+helm install authpractice helm/
 
-Images are available at: `ghcr.io/davidagustin/authpractice`
+# Port forward to access the application
+kubectl port-forward svc/authpractice 8080:3000
+```
 
 ## 📋 Prerequisites
 
 - Node.js 18.x or 20.x
 - pnpm (recommended) or npm
-- Docker (optional)
+- Docker (for containerization)
+- Kubernetes cluster (k3d, minikube, or cloud provider)
+- Helm 3.0+
 
 ## 🛠️ Available Scripts
+
+From the `frontend/` directory:
 
 - `pnpm run dev` - Start development server with Turbopack
 - `pnpm run build` - Build for production
@@ -94,14 +96,7 @@ Images are available at: `ghcr.io/davidagustin/authpractice`
 
 ## 🤝 Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our trunk-based development workflow and how to contribute.
-
-### Branch Naming Convention
-
-- `feature/description` - New features
-- `fix/description` - Bug fixes
-- `docs/description` - Documentation updates
-- `refactor/description` - Code refactoring
+This project follows conventional commit standards for versioning and releases.
 
 ### Commit Message Format
 
@@ -115,23 +110,42 @@ type(scope): description
 [optional footer]
 ```
 
+Examples:
+- `feat: add user authentication`
+- `fix: resolve login button styling`
+- `docs: update deployment instructions`
+- `chore: bump version to 0.1.1`
+
 ## 📦 Release Process
 
-- **Automated**: Semantic-release handles versioning
+- **Automated**: Semantic-release handles versioning based on conventional commits
 - **Continuous**: Every merge to main triggers a release
-- **Deployment**: Automatic deployment to staging and production
+- **Deployment**: Manual deployment to Kubernetes using Helm
 
-## 🔧 CI/CD Pipeline
+## 🔧 Deployment
 
-- **CI**: Runs on every PR and push to main
-  - Linting and type checking
-  - Unit and integration tests
-  - Security audit
-  - Docker build verification
+### Local Kubernetes (k3d)
 
-- **CD**: Deploys on merge to main
-  - Staging deployment
-  - Production deployment (after staging approval)
+```bash
+# Start k3d cluster
+k3d cluster create authpractice
+
+# Build and import image
+docker build -t authpractice:latest frontend/
+k3d image import authpractice:latest
+
+# Deploy with Helm
+helm install authpractice helm/
+
+# Access the application
+kubectl port-forward svc/authpractice 8080:3000
+```
+
+### Production Deployment
+
+1. Build and push Docker image to your registry
+2. Update `helm/values.yaml` with your image repository
+3. Deploy using Helm to your Kubernetes cluster
 
 ## 📄 License
 
@@ -140,4 +154,4 @@ This project is licensed under the MIT License.
 ## 🆘 Support
 
 - Create an issue for bugs or feature requests
-- Check the [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
+- Check the [Helm README](helm/README.md) for deployment details

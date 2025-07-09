@@ -144,6 +144,8 @@ temp/
 
 # Docker
 .dockerignore
+# Docker build context (moved to frontend/)
+frontend/.dockerignore
 
 # Kubernetes
 *.kubeconfig

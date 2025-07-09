@@ -14,19 +14,19 @@ A Helm chart for deploying the AuthPractice Next.js application to Kubernetes.
 
 ```bash
 # Install the chart
-helm install authpractice ./authpractice
+helm install authpractice ./helm
 
 # Install with custom values
-helm install authpractice ./authpractice --values custom-values.yaml
+helm install authpractice ./helm --values custom-values.yaml
 
 # Install in a specific namespace
-helm install authpractice ./authpractice --namespace my-namespace --create-namespace
+helm install authpractice ./helm --namespace my-namespace --create-namespace
 ```
 
 ### Upgrade existing installation:
 
 ```bash
-helm upgrade authpractice ./authpractice
+helm upgrade authpractice ./helm
 ```
 
 ## Configuration
@@ -39,8 +39,9 @@ The following table lists the configurable parameters of the authpractice chart 
 | `image.repository` | Container image repository | `authpractice` |
 | `image.tag` | Container image tag | `latest` |
 | `image.pullPolicy` | Container image pull policy | `IfNotPresent` |
-| `service.type` | Kubernetes service type | `ClusterIP` |
+| `service.type` | Kubernetes service type | `NodePort` |
 | `service.port` | Kubernetes service port | `3000` |
+| `service.nodePort` | Kubernetes service node port | `30000` |
 | `ingress.enabled` | Enable ingress | `false` |
 | `resources` | CPU/Memory resource requests/limits | `{}` |
 | `autoscaling.enabled` | Enable autoscaling | `false` |
@@ -50,13 +51,13 @@ The following table lists the configurable parameters of the authpractice chart 
 ### Basic deployment:
 
 ```bash
-helm install authpractice ./authpractice
+helm install authpractice ./helm
 ```
 
 ### With custom image:
 
 ```bash
-helm install authpractice ./authpractice \
+helm install authpractice ./helm \
   --set image.repository=my-registry/authpractice \
   --set image.tag=v1.0.0
 ```
@@ -64,7 +65,7 @@ helm install authpractice ./authpractice \
 ### With ingress enabled:
 
 ```bash
-helm install authpractice ./authpractice \
+helm install authpractice ./helm \
   --set ingress.enabled=true \
   --set ingress.hosts[0].host=authpractice.example.com
 ```
@@ -72,7 +73,7 @@ helm install authpractice ./authpractice \
 ### With autoscaling:
 
 ```bash
-helm install authpractice ./authpractice \
+helm install authpractice ./helm \
   --set autoscaling.enabled=true \
   --set autoscaling.minReplicas=2 \
   --set autoscaling.maxReplicas=10
@@ -86,15 +87,38 @@ helm uninstall authpractice
 
 ## Building the Docker Image
 
-Before deploying, ensure you have built the Docker image:
+Before deploying, ensure you have built the Docker image from the frontend directory:
 
 ```bash
+# Navigate to frontend directory
+cd frontend
+
 # Build the image
 docker build -t authpractice:latest .
 
-# Push to your registry (if needed)
+# For k3d local development
+k3d image import authpractice:latest
+
+# Push to your registry (for production)
 docker tag authpractice:latest your-registry/authpractice:latest
 docker push your-registry/authpractice:latest
+```
+
+## Local Development with k3d
+
+```bash
+# Start k3d cluster
+k3d cluster create authpractice
+
+# Build and import image
+docker build -t authpractice:latest frontend/
+k3d image import authpractice:latest
+
+# Deploy with Helm
+helm install authpractice ./helm
+
+# Port forward to access the application
+kubectl port-forward svc/authpractice 8080:3000
 ```
 
 ## Health Checks
@@ -107,4 +131,5 @@ The chart includes liveness and readiness probes:
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Helm Documentation](https://helm.sh/docs)
-- [Kubernetes Documentation](https://kubernetes.io/docs) 
+- [Kubernetes Documentation](https://kubernetes.io/docs)
+- [k3d Documentation](https://k3d.io/) 
