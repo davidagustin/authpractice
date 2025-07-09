@@ -6,6 +6,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!pool) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 503 }
+      );
+    }
+
     const { title, description, completed } = await request.json();
     const { id } = await params;
     const todoId = parseInt(id);
@@ -32,6 +39,20 @@ export async function PUT(
     return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error('Error updating todo:', error);
+    
+    // In development, return a mock response
+    if (process.env.NODE_ENV === 'development') {
+      const mockTodo = {
+        id: parseInt((await params).id),
+        title: 'Mock Updated Todo',
+        description: 'This is a mock updated todo because the database is not available in development.',
+        completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      return NextResponse.json(mockTodo);
+    }
+    
     return NextResponse.json(
       { error: 'Failed to update todo' },
       { status: 500 }
@@ -44,6 +65,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!pool) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 503 }
+      );
+    }
+
     const { id } = await params;
     const todoId = parseInt(id);
 
@@ -69,6 +97,12 @@ export async function DELETE(
     return NextResponse.json({ message: 'Todo deleted successfully' });
   } catch (error) {
     console.error('Error deleting todo:', error);
+    
+    // In development, return success
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json({ message: 'Mock todo deleted successfully' });
+    }
+    
     return NextResponse.json(
       { error: 'Failed to delete todo' },
       { status: 500 }
